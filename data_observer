@@ -1,0 +1,50 @@
+let data = {price: 5, quanlity: 2, total: 0}
+let target = null
+
+class Dep {
+    constructor () {
+        this.subscribers = []
+    }
+    subscriber() {
+        if(target && !this.subscribers.includes(target)) {
+            this.subscribers.push(target)
+        }
+    }
+    notify() {
+        this.subscribers.forEach(fun => {
+            fun()
+        })
+    }
+
+}
+Object.keys(data).forEach(key => {
+    let initValue = data[key]
+    let dep =new Dep() // 每个属性key 都有一个独立的dep实例
+    Object.defineProperty(data, key, {
+        get() {
+            dep.subscriber()  // 记录 监听的函数
+            console.log(`Get ${key} : ${initValue}`)
+            return initValue
+        },
+        set(val) {
+            console.log(`Set ${key} : ${val}`)
+            initValue = val
+            dep.notify()  //执行监听的函数
+        }
+    })
+})
+// 观察者 
+function watcher(fun) {
+    target = fun
+    target()
+    target = null
+}
+//调用
+watcher(() => {
+    data.total = data.price * data.quanlity
+})
+
+
+
+
+
